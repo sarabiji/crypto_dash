@@ -1,3 +1,6 @@
+{% extends "base.html" %}
+
+{% block content %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,7 +10,7 @@
     <title>Crypto Dashboard</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
-        table { border-collapse: collapse; width: 100%; }
+        table { border-collapse: collapse; width: 100%; margin-top: 15px; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
         th { background: #f4f4f4; }
         .error { color: red; margin-bottom: 15px; }
@@ -16,16 +19,17 @@
 <body>
     <h1>Top Cryptocurrencies</h1>
 
-    {% if error %}
-        <p class="error">⚠ {{ error }}</p>
+    {% if error_msg %}
+        <p class="error">⚠ {{ error_msg }}</p>
     {% endif %}
 
     {% if coins %}
         <table>
             <tr>
                 <th>Coin</th>
-                <th>Price</th>
+                <th>Price (USD)</th>
                 <th>Market Cap</th>
+                <th>24h Change</th>
             </tr>
             {% for coin in coins %}
                 <tr>
@@ -35,18 +39,20 @@
                     </td>
                     <td>${{ "%.2f"|format(coin.current_price) }}</td>
                     <td>${{ "{:,}".format(coin.market_cap) }}</td>
+                    <td style="color: {{ 'green' if coin.price_change_percentage_24h >= 0 else 'red' }};">
+                        {{ "%.2f"|format(coin.price_change_percentage_24h) }}%
+                    </td>
                 </tr>
             {% endfor %}
         </table>
     {% else %}
         <p>No data available right now. Please try again later.</p>
     {% endif %}
-</body>
-<p>Data fetched from the CoinGecko API.</p>
+
+    <p>Data fetched from the CoinGecko API.</p>
     <footer>
         <p>&copy; 2025 Crypto Dashboard</p>
     </footer>
+</body>
 </html>
 {% endblock %}
-{% extends "base.html" %}
-{% block content %}

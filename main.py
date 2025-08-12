@@ -5,22 +5,22 @@ from flask import Flask, render_template, request
 app = Flask(__name__)
 
 # Cache variables
-cache_data = None
+cache_data = []
 cache_timestamp = 0
-CACHE_DURATION = 300  # 5 minutes in seconds
+CACHE_DURATION = 300  # 5 minutes
 
 @app.route("/", methods=["GET", "HEAD"])
 def index():
     global cache_data, cache_timestamp
 
-    # Ignore HEAD requests from Render health checks
+    # Ignore HEAD requests (Render health checks)
     if request.method == "HEAD":
         return "", 200
 
     now = time.time()
 
-    # If cache is empty or expired, fetch new data
-    if cache_data is None or (now - cache_timestamp) > CACHE_DURATION:
+    # Refresh cache if expired
+    if not cache_data or (now - cache_timestamp) > CACHE_DURATION:
         try:
             response = requests.get(
                 "https://api.coingecko.com/api/v3/coins/markets",
@@ -35,21 +35,19 @@ def index():
             )
             data = response.json()
 
-            # If API returned an error, keep old cache
-            if isinstance(data, list):
+            if isinstance(data, list) and all(isinstance(c, dict) for c in data):
                 cache_data = data
                 cache_timestamp = now
             else:
-                print("API error, keeping old cache:", data)
+                print("CoinGecko returned error:", data)
 
         except Exception as e:
             print("Error fetching CoinGecko data:", e)
 
-    # Render page with cached data (or empty if nothing cached yet)
     return render_template(
         "index.html",
-        coins=cache_data if cache_data else [],
-        error=None if cache_data else "No data available (API rate limit reached)"
+        coins=cache_data,
+        error_msg=None if cache_data else "⚠ API limit reached — showing no data."
     )
 
 if __name__ == "__main__":
