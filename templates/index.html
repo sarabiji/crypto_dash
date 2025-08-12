@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crypto Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Top 5 Cryptocurrencies</h1>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Price (USD)</th>
+            <th>24h Change</th>
+        </tr>
+        {% for coin in coins %}
+        <tr>
+            <td>{{ coin.name }}</td>
+            <td>${{ "%.2f"|format(coin.current_price) }}</td>
+            <td class="{{ 'gain' if coin.price_change_percentage_24h >= 0 else 'loss' }}">
+                {{ "%.2f"|format(coin.price_change_percentage_24h) }}%
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
