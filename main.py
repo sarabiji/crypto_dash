@@ -8,7 +8,7 @@ def get_crypto_data():
     params = {
         "vs_currency": "usd",   # Required parameter
         "order": "market_cap_desc",
-        "per_page": 100,
+        "per_page": 10,
         "page": 1,
         "sparkline": "false"
     }
