@@ -8,7 +8,7 @@ def get_crypto_data():
     params = {
         "vs_currency": "usd",   # Required parameter
         "order": "market_cap_desc",
-        "per_page": 5,
+        "per_page": 100,
         "page": 1,
         "sparkline": "false"
     }
@@ -20,7 +20,7 @@ def get_crypto_data():
 @app.route("/")
 def index():
     data = get_crypto_data()
-    print(data)  # 👈 See exactly what the API gives you
+    print(data)  
     return render_template("index.html", coins=data)
 
 if __name__ == "__main__":
