@@ -5,22 +5,33 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Top 10 Cryptocurrencies</h1>
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Price (USD)</th>
-            <th>24h Change</th>
-        </tr>
-        {% for coin in coins %}
-        <tr>
-            <td>{{ coin.name }}</td>
-            <td>${{ "%.2f"|format(coin.current_price) }}</td>
-            <td class="{{ 'gain' if coin.price_change_percentage_24h >= 0 else 'loss' }}">
-                {{ "%.2f"|format(coin.price_change_percentage_24h) }}%
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+    <h2>Top 5 Cryptocurrencies</h2>
+<table border="1">
+    <tr>
+        <th>Name</th>
+        <th>Price (USD)</th>
+        <th>24h Change</th>
+    </tr>
+    {% for coin in coins %}
+        {% if coin is mapping %}
+            <tr>
+                <td>{{ coin.name }}</td>
+                <td>${{ "%.2f"|format(coin.current_price) }}</td>
+                <td>{{ "%.2f"|format(coin.price_change_percentage_24h) }}%</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3" style="color:red;">
+                    Invalid coin data: {{ coin }}
+                </td>
+            </tr>
+        {% endif %}
+    {% endfor %}
+</table>
+
+    <p>Data fetched from the CoinGecko API.</p>
+    <footer>
+        <p>&copy; 2023 Crypto Dashboard</p>
+    </footer>
 </body>
 </html>
