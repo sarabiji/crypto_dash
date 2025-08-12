@@ -15,9 +15,12 @@ def get_crypto_data():
     response = requests.get(url, params=params)
     return response.json()
 
+
+
 @app.route("/")
 def index():
     data = get_crypto_data()
+    print(data)  # 👈 See exactly what the API gives you
     return render_template("index.html", coins=data)
 
 if __name__ == "__main__":
