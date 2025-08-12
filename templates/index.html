@@ -5,33 +5,43 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>Top 5 Cryptocurrencies</h2>
-<table border="1">
-    <tr>
-        <th>Name</th>
-        <th>Price (USD)</th>
-        <th>24h Change</th>
-    </tr>
-    {% for coin in coins %}
-        {% if coin is mapping %}
+    <h2>Top {{ coins|length }} Cryptocurrencies</h2>
+
+    <table>
+        <thead>
             <tr>
-                <td>{{ coin.name }}</td>
-                <td>${{ "%.2f"|format(coin.current_price) }}</td>
-                <td>{{ "%.2f"|format(coin.price_change_percentage_24h) }}%</td>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Price (USD)</th>
+                <th>24h Change</th>
             </tr>
-        {% else %}
-            <tr>
-                <td colspan="3" style="color:red;">
-                    Invalid coin data: {{ coin }}
-                </td>
-            </tr>
-        {% endif %}
-    {% endfor %}
-</table>
+        </thead>
+        <tbody>
+            {% for coin in coins %}
+                {% if coin is mapping %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>
+                            <img src="{{ coin.image }}" alt="{{ coin.name }}" width="20" height="20" style="vertical-align: middle; margin-right: 5px;">
+                            {{ coin.name }}
+                        </td>
+                        <td>${{ "%.2f"|format(coin.current_price) }}</td>
+                        <td class="{{ 'gain' if coin.price_change_percentage_24h >= 0 else 'loss' }}">
+                            {{ "%.2f"|format(coin.price_change_percentage_24h) }}%
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="color:red;">Invalid coin data: {{ coin }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
 
     <p>Data fetched from the CoinGecko API.</p>
     <footer>
-        <p>&copy; 2023 Crypto Dashboard</p>
+        <p>&copy; 2025 Crypto Dashboard</p>
     </footer>
 </body>
 </html>
