@@ -1,47 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Crypto Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Crypto Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background: #f4f4f4; }
+        .error { color: red; margin-bottom: 15px; }
+    </style>
 </head>
 <body>
-    <h2>Top {{ coins|length }} Cryptocurrencies</h2>
+    <h1>Top Cryptocurrencies</h1>
 
-    <table>
-        <thead>
+    {% if error %}
+        <p class="error">⚠ {{ error }}</p>
+    {% endif %}
+
+    {% if coins %}
+        <table>
             <tr>
-                <th>Rank</th>
-                <th>Name</th>
-                <th>Price (USD)</th>
-                <th>24h Change</th>
+                <th>Coin</th>
+                <th>Price</th>
+                <th>Market Cap</th>
             </tr>
-        </thead>
-        <tbody>
             {% for coin in coins %}
-                {% if coin is mapping %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>
-                            <img src="{{ coin.image }}" alt="{{ coin.name }}" width="20" height="20" style="vertical-align: middle; margin-right: 5px;">
-                            {{ coin.name }}
-                        </td>
-                        <td>${{ "%.2f"|format(coin.current_price) }}</td>
-                        <td class="{{ 'gain' if coin.price_change_percentage_24h >= 0 else 'loss' }}">
-                            {{ "%.2f"|format(coin.price_change_percentage_24h) }}%
-                        </td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="4" style="color:red;">Invalid coin data: {{ coin }}</td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <td>
+                        <img src="{{ coin.image }}" alt="{{ coin.name }}" width="20">
+                        {{ coin.name }}
+                    </td>
+                    <td>${{ "%.2f"|format(coin.current_price) }}</td>
+                    <td>${{ "{:,}".format(coin.market_cap) }}</td>
+                </tr>
             {% endfor %}
-        </tbody>
-    </table>
-
-    <p>Data fetched from the CoinGecko API.</p>
+        </table>
+    {% else %}
+        <p>No data available right now. Please try again later.</p>
+    {% endif %}
+</body>
+<p>Data fetched from the CoinGecko API.</p>
     <footer>
         <p>&copy; 2025 Crypto Dashboard</p>
     </footer>
-</body>
 </html>
+{% endblock %}
+{% extends "base.html" %}
+{% block content %}
