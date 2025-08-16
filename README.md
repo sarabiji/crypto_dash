@@ -10,7 +10,7 @@ A simple Flask-based web application that displays the top cryptocurrencies usin
 
 1.  **Clone this repository**
     ```bash
-    git clone [https://github.com/yourusername/crypto-dashboard.git](https://github.com/yourusername/crypto-dashboard.git)
+    git clone [https://github.com/sarabiji/crypto-dashboard.git](https://github.com/sarabiji/crypto-dashboard.git)
     cd crypto-dashboard
     ```
 2.  **Create a virtual environment**
