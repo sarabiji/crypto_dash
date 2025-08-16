@@ -47,14 +47,18 @@ def home():
     # Check if the cache is stale
     if time.time() - last_updated > CACHE_INTERVAL_SECONDS:
         print("Cache is stale. Fetching new data...")
-        # Fetch new data and update the cache and timestamp
         new_data, error = get_crypto_data()
+        
+        # Check if new data was successfully fetched
         if new_data:
             cached_data = new_data
             last_updated = time.time()
+        # If new data fetch failed but old data exists, serve the old data with a warning
+        elif cached_data:
+            print(f"Failed to fetch new data. Serving stale data from cache. Error: {error}")
+            # We don't need to return a template here, as the code will continue to the render step.
         else:
-            # If a new fetch fails, we can either serve the old data
-            # or an error message. Here, we'll serve the error.
+            # If there's no cached data and the fetch failed, then we must show the error.
             return render_template("index.html", coins=None, error=error)
     else:
         print("Serving data from cache.")
