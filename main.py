@@ -1,54 +1,66 @@
+# main.py
 import requests
 import time
-from flask import Flask, render_template, request
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
-# Cache variables
-cache_data = []
-cache_timestamp = 0
-CACHE_DURATION = 300  # 5 minutes
+# --- Caching Configuration ---
+# Global variables to store the cached data and the last update time.
+# This simple in-memory cache avoids repeated API calls.
+cached_data = None
+last_updated = 0
+CACHE_INTERVAL_SECONDS = 300  # Refresh data every 5 minutes
 
-@app.route("/", methods=["GET", "HEAD"])
-def index():
-    global cache_data, cache_timestamp
+# --- API Configuration ---
+API_URL = "https://api.coingecko.com/api/v3/coins/markets"
+API_PARAMS = {
+    "vs_currency": "usd",
+    "order": "market_cap_desc",
+    "per_page": 20,
+    "page": 1,
+    "sparkline": "false"
+}
 
-    # Ignore HEAD requests (Render health checks)
-    if request.method == "HEAD":
-        return "", 200
+def get_crypto_data():
+    """
+    Fetches the top cryptocurrencies from the CoinGecko API.
+    Returns a tuple of (data, error_message).
+    """
+    try:
+        response = requests.get(API_URL, params=API_PARAMS, timeout=10)
+        # Raise an exception for bad status codes (4xx or 5xx)
+        response.raise_for_status()
+        return response.json(), None
+    except requests.exceptions.RequestException as e:
+        # Handle various request-related errors gracefully
+        return None, f"Error fetching data from API: {e}. Please check your internet connection or the API status."
 
-    now = time.time()
+@app.route("/")
+def home():
+    """
+    The main route for the dashboard.
+    This route implements a caching mechanism.
+    """
+    global cached_data, last_updated
 
-    # Refresh cache if expired
-    if not cache_data or (now - cache_timestamp) > CACHE_DURATION:
-        try:
-            response = requests.get(
-                "https://api.coingecko.com/api/v3/coins/markets",
-                params={
-                    "vs_currency": "usd",
-                    "order": "market_cap_desc",
-                    "per_page": 10,
-                    "page": 1,
-                    "sparkline": False
-                },
-                timeout=10
-            )
-            data = response.json()
+    # Check if the cache is stale
+    if time.time() - last_updated > CACHE_INTERVAL_SECONDS:
+        print("Cache is stale. Fetching new data...")
+        # Fetch new data and update the cache and timestamp
+        new_data, error = get_crypto_data()
+        if new_data:
+            cached_data = new_data
+            last_updated = time.time()
+        else:
+            # If a new fetch fails, we can either serve the old data
+            # or an error message. Here, we'll serve the error.
+            return render_template("index.html", coins=None, error=error)
+    else:
+        print("Serving data from cache.")
 
-            if isinstance(data, list) and all(isinstance(c, dict) for c in data):
-                cache_data = data
-                cache_timestamp = now
-            else:
-                print("CoinGecko returned error:", data)
-
-        except Exception as e:
-            print("Error fetching CoinGecko data:", e)
-
-    return render_template(
-        "index.html",
-        coins=cache_data,
-        error_msg=None if cache_data else "⚠ API limit reached — showing no data."
-    )
+    # Render the HTML template with the cached data
+    return render_template("index.html", coins=cached_data, error=None)
 
 if __name__ == "__main__":
     app.run(debug=True)
